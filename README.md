@@ -74,11 +74,29 @@ python utils.py sample output/combined_training_data.jsonl --n 5
 python utils.py validate output/combined_training_data.jsonl
 ```
 
-## Design Highlights
-- API-first, async I/O, connection pooling
-- Atomic state management for safe resume
-- Handles network, data, and system edge cases
-- Modular and extensible
+
+## Architecture Overview
+The pipeline is modular and async, built around:
+- **API Client:** Async Jira REST API client with retry, rate limiting, and connection pooling.
+- **State Manager:** Atomic checkpointing for safe resume and fault tolerance.
+- **Scraper:** Orchestrates async, concurrent data collection and progress tracking.
+- **Transformer:** Cleans and transforms issues into multiple LLM tasks (summarization, classification, Q&A, etc.).
+- **CLI & Utilities:** Easy command-line usage and data validation tools.
+
+## Edge Cases Handled
+- Network errors, timeouts, and rate limits (with retries and backoff)
+- Server/API errors (429, 5xx, permission issues)
+- Incomplete or malformed data (safe extraction, defaults)
+- Interruption and resume (atomic state saves)
+- Disk/memory issues (batch processing, atomic writes)
+
+## Optimization Decisions
+- Async I/O and connection pooling for high throughput
+- Token bucket rate limiting to avoid bans
+- Batch processing and checkpointing for efficiency and reliability
+- Modular design for easy extension and maintenance
+
+
 
 
 
